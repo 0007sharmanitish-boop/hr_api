@@ -78,14 +78,14 @@ RSpec.describe "Employees API", type: :request do
     it "returns error when updating email to one that already exists" do
       patch "/api/v1/employees/#{employee.id}", params: { employee: { email: another_employee.email } }
       
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(json_body["errors"]).to include("Email has already been taken")
     end
 
     it "returns error when trying to update employee_code" do
       patch "/api/v1/employees/#{employee.id}", params: { employee: { employee_code: "NEW-CODE-123" } }
       
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(json_body["errors"]).to include("Employee code cannot be changed")
       
       expect(employee.reload.employee_code).not_to eq("NEW-CODE-123")
