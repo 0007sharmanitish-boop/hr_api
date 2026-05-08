@@ -54,4 +54,41 @@ RSpec.describe "Employees API", type: :request do
       end
     end
   end
+
+  describe "PATCH /api/v1/employees/:id" do
+    let(:new_email) { Faker::Internet.unique.email }
+    let(:update_params) { { employee: { first_name: "Nitish", email: new_email } } }
+    let!(:another_employee) { create(:employee) }
+
+    it "returns not found for non-existent employee" do
+      patch "/api/v1/employees/999", params: { employee: { first_name: "Updated" } }
+      expect(response).to have_http_status(:not_found)
+      expect(json_body["errors"]).to include("Resource Not Found")
+    end
+
+    it "updates correctly with valid params" do
+      patch "/api/v1/employees/#{employee.id}", params: update_params
+      expect(response).to have_http_status(:success)
+      
+      employee.reload
+      expect(employee.first_name).to eq("Nitish")
+      expect(employee.email).to eq(new_email)
+    end
+
+    it "returns error when updating email to one that already exists" do
+      patch "/api/v1/employees/#{employee.id}", params: { employee: { email: another_employee.email } }
+      
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(json_body["errors"]).to include("Email has already been taken")
+    end
+
+    it "returns error when trying to update employee_code" do
+      patch "/api/v1/employees/#{employee.id}", params: { employee: { employee_code: "NEW-CODE-123" } }
+      
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(json_body["errors"]).to include("Employee code cannot be changed")
+      
+      expect(employee.reload.employee_code).not_to eq("NEW-CODE-123")
+    end
+  end
 end
