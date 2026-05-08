@@ -91,4 +91,18 @@ RSpec.describe "Employees API", type: :request do
       expect(employee.reload.employee_code).not_to eq("NEW-CODE-123")
     end
   end
+
+  describe "GET /api/v1/employees/:id" do
+    it "returns the requested employee" do
+      get "/api/v1/employees/#{employee.id}"
+      
+      expect(response).to have_http_status(:ok)
+      expect(json_body["data"]["id"]).to eq(employee.id)
+    end
+
+    it "returns 404 for non-existent employee" do
+      get "/api/v1/employees/9999"
+      expect(response).to have_http_status(:not_found)
+    end
+  end
 end
