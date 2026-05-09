@@ -34,3 +34,6 @@
 # Ignore coverage directory
 /coverage/
 
+# Ignore source files for first and last names
+first_names.txt
+last_names.txt
