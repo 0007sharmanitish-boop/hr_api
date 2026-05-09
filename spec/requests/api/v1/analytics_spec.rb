@@ -1,6 +1,9 @@
-require 'rails_helper'
+require "rails_helper"
 
 RSpec.describe "Analytics API", type: :request do
+  let!(:current_user) { create(:user) }
+  let(:headers) { auth_headers_for(current_user) }
+
   describe "GET /api/v1/analytics/country_salary_statistics" do
     it "returns min, max, and average salary for employees in the given country" do
       create(:employee, country: "US", salary: 50_000.00, job_title: "Analyst")
@@ -8,7 +11,9 @@ RSpec.describe "Analytics API", type: :request do
       create(:employee, country: "US", salary: 110_000.00, job_title: "Manager")
       create(:employee, country: "CA", salary: 200_000.00, job_title: "Director")
 
-      get "/api/v1/analytics/country_salary_statistics", params: { country: "us" }
+      get "/api/v1/analytics/country_salary_statistics",
+          params: { country: "us" },
+          headers: headers
 
       expect(response).to have_http_status(:ok)
       data = json_body["data"]
@@ -20,7 +25,9 @@ RSpec.describe "Analytics API", type: :request do
     end
 
     it "returns null aggregates when no employees exist for the country" do
-      get "/api/v1/analytics/country_salary_statistics", params: { country: "US" }
+      get "/api/v1/analytics/country_salary_statistics",
+          params: { country: "US" },
+          headers: headers
 
       expect(response).to have_http_status(:ok)
       data = json_body["data"]
@@ -32,13 +39,15 @@ RSpec.describe "Analytics API", type: :request do
     end
 
     it "returns bad request when country is missing" do
-      get "/api/v1/analytics/country_salary_statistics"
+      get "/api/v1/analytics/country_salary_statistics", headers: headers
 
       expect(response).to have_http_status(:bad_request)
     end
 
     it "returns bad request when country is not a 2-letter code" do
-      get "/api/v1/analytics/country_salary_statistics", params: { country: "USA" }
+      get "/api/v1/analytics/country_salary_statistics",
+          params: { country: "USA" },
+          headers: headers
 
       expect(response).to have_http_status(:bad_request)
       expect(json_body["errors"]).to be_present
@@ -53,7 +62,8 @@ RSpec.describe "Analytics API", type: :request do
       create(:employee, country: "CA", job_title: "Engineer", salary: 300_000.00)
 
       get "/api/v1/analytics/job_title_average_salary",
-          params: { country: "US", job_title: "Engineer" }
+          params: { country: "US", job_title: "Engineer" },
+          headers: headers
 
       expect(response).to have_http_status(:ok)
       data = json_body["data"]
@@ -67,7 +77,8 @@ RSpec.describe "Analytics API", type: :request do
       create(:employee, country: "US", job_title: "Analyst", salary: 50_000.00)
 
       get "/api/v1/analytics/job_title_average_salary",
-          params: { country: "US", job_title: "Engineer" }
+          params: { country: "US", job_title: "Engineer" },
+          headers: headers
 
       expect(response).to have_http_status(:ok)
       data = json_body["data"]
@@ -76,13 +87,17 @@ RSpec.describe "Analytics API", type: :request do
     end
 
     it "returns bad request when country is missing" do
-      get "/api/v1/analytics/job_title_average_salary", params: { job_title: "Engineer" }
+      get "/api/v1/analytics/job_title_average_salary",
+          params: { job_title: "Engineer" },
+          headers: headers
 
       expect(response).to have_http_status(:bad_request)
     end
 
     it "returns bad request when job_title is missing" do
-      get "/api/v1/analytics/job_title_average_salary", params: { country: "US" }
+      get "/api/v1/analytics/job_title_average_salary",
+          params: { country: "US" },
+          headers: headers
 
       expect(response).to have_http_status(:bad_request)
     end
