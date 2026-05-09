@@ -1,0 +1,15 @@
+# Additional Devise messages can be added from:
+# https://github.com/heartcombo/devise/blob/main/config/locales/devise.en.yml
+en:
+  devise:
+    failure:
+      already_authenticated: "You are already signed in."
+      unauthenticated: "You need to sign in/sign up before continuing."
+      unconfirmed: "You have to confirm your email address before continuing."
+      locked: "Your account is locked."
+      invalid: "Invalid %{authentication_keys} or password."
+      invalid_token: "Invalid authentication token."
+      timeout: "Your session expired. Please sign in again to continue."
+      inactive: "Your account is not activated yet."
+      last_attempt: "You have one more attempt before your account is locked."
+      not_found_in_database: "Invalid %{authentication_keys} or password."

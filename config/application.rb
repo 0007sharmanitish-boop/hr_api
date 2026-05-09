@@ -40,5 +40,13 @@ module HrApi
     # Middleware like session, flash, cookies can be added back manually.
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
+
+    # Devise/Warden still write to Rack session on sign-in and sign-up. API-only Rails
+    # disables sessions unless this stack is restored. JWT clients use Authorization;
+    # the cookie session is only to satisfy Devise during those actions.
+    config.session_store :cookie_store, key: "_hr_api_session"
+    config.middleware.use ActionDispatch::Cookies
+    config.middleware.use ActionDispatch::Session::CookieStore,
+      config.session_options
   end
 end

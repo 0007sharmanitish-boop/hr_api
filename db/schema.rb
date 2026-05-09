@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_07_123724) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_09_120001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -31,5 +31,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_07_123724) do
     t.index ["email"], name: "index_employees_on_email", unique: true
     t.index ["employee_code"], name: "index_employees_on_employee_code", unique: true
     t.index ["salary"], name: "index_employees_on_salary"
+  end
+
+  create_table "jwt_denylist", force: :cascade do |t|
+    t.datetime "exp", null: false
+    t.string "jti", null: false
+    t.index ["jti"], name: "index_jwt_denylist_on_jti", unique: true
+  end
+
+  create_table "users", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "email", default: "", null: false
+    t.string "encrypted_password", default: "", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_users_on_email", unique: true
   end
 end

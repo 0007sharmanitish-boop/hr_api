@@ -35,11 +35,18 @@ services:
     volumes:
       - hr_redis_data:/data
 
+  # Not started by default (`docker compose up`). Same image as hr_api but no web server.
+  # One-off: docker compose -f docker-compose.dev.yml --profile test run --rm hr_api_test bundle exec rspec
+  # Shell + DB ready: docker compose -f docker-compose.dev.yml --profile test up -d hr_api_test
   hr_api_test:
+    profiles:
+      - test
     build:
       context: .
       dockerfile: Dockerfile.dev
     env_file: .env.test
+    environment:
+      RAILS_ENV: test
     depends_on:
       hrdb:
         condition: service_healthy
@@ -48,6 +55,7 @@ services:
     volumes:
       - .:/rails
       - bundle_cache:/usr/local/bundle
+    command: ["sleep", "infinity"]
 
 volumes:
   hr_db_data:

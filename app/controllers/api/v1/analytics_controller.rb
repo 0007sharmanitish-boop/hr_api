@@ -1,4 +1,4 @@
-class Api::V1::AnalyticsController < ApplicationController
+class Api::V1::AnalyticsController < Api::V1::BaseController
   def country_salary_statistics
     country = normalize_country(params.require(:country))
     return invalid_country_response unless country
