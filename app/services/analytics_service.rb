@@ -4,12 +4,29 @@ class AnalyticsService
   end
 
   def country_salary_statistics(country_code:)
+    code = country_code.to_s.upcase
+    Rails.cache.fetch(AnalyticsCache.country_salary_key(code), expires_in: AnalyticsCache::EXPIRATION) do
+      compute_country_salary_statistics(code)
+    end
+  end
+
+  def job_title_average_salary(country_code:, job_title:)
+    code = country_code.to_s.upcase
+    Rails.cache.fetch(
+      AnalyticsCache.job_title_average_key(code, job_title),
+      expires_in: AnalyticsCache::EXPIRATION
+    ) do
+      compute_job_title_average_salary(code, job_title)
+    end
+  end
+
+  private
+
+  def compute_country_salary_statistics(country_code)
     rel = scoped_to_country(country_code)
     count = rel.count
 
-    if count.zero?
-      return empty_country_stats(country_code)
-    end
+    return empty_country_stats(country_code) if count.zero?
 
     min_salary, max_salary, avg_salary = rel.pick(
       Arel.sql("MIN(salary)"),
@@ -26,13 +43,11 @@ class AnalyticsService
     }
   end
 
-  def job_title_average_salary(country_code:, job_title:)
+  def compute_job_title_average_salary(country_code, job_title)
     rel = scoped_to_country(country_code).where(job_title: job_title)
     count = rel.count
 
-    if count.zero?
-      return empty_job_title_stats(country_code, job_title)
-    end
+    return empty_job_title_stats(country_code, job_title) if count.zero?
 
     avg = rel.pick(Arel.sql("AVG(salary)"))
     {
@@ -42,8 +57,6 @@ class AnalyticsService
       average_salary: avg.to_d.round(2)
     }
   end
-
-  private
 
   def scoped_to_country(country_code)
     @employee_scope.where(country: country_code)

@@ -9,7 +9,13 @@ class Employee < ApplicationRecord
   validates :salary, presence: true, numericality: { greater_than: 0 }
   validates :hire_date, presence: true # rails 7+ automatically handle date parsing and presence ensures that it a valid date not nil
 
+  after_commit :invalidate_analytics_cache
+
   private
+
+  def invalidate_analytics_cache
+    AnalyticsCache.invalidate_for_employee(self)
+  end
 
   def assign_employee_code
     return if employee_code.present?
