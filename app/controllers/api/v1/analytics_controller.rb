@@ -3,7 +3,7 @@ class Api::V1::AnalyticsController < ApplicationController
     country = normalize_country(params.require(:country))
     return invalid_country_response unless country
 
-    render_success(Employee.salary_statistics_for_country(country))
+    render_success(analytics.country_salary_statistics(country_code: country))
   end
 
   def job_title_average_salary
@@ -16,10 +16,14 @@ class Api::V1::AnalyticsController < ApplicationController
       return
     end
 
-    render_success(Employee.average_salary_for_job_title_in_country(country, job_title))
+    render_success(analytics.job_title_average_salary(country_code: country, job_title: job_title))
   end
 
   private
+
+  def analytics
+    @analytics ||= AnalyticsService.new
+  end
 
   def normalize_country(raw)
     code = raw.to_s.strip.upcase
