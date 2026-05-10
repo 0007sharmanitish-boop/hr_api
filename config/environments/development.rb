@@ -33,7 +33,9 @@ Rails.application.configure do
   # In Docker Compose, REDIS_URL must use the Redis service hostname (see docker-compose.dev.yml).
   config.cache_store = :redis_cache_store, {
     url: ENV.fetch("REDIS_URL") { "redis://localhost:6379/0" },
-    namespace: "hr_api_#{Rails.env}"
+    namespace: "hr_api_#{Rails.env}",
+    expires_in: 7.days,
+    pool: { size: 5, timeout: 5.seconds }
   }
 
   # Don't care if the mailer can't send.

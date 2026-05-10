@@ -45,8 +45,7 @@ Rails.application.configure do
     url: ENV.fetch("REDIS_URL") { "redis://localhost:6379/0" },
     namespace: "cache",
     expires_in: 7.days,
-    pool_size: 5,
-    pool_timeout: 5.seconds
+    pool: { size: 5, timeout: 5.seconds }
   }
 
   config.active_job.queue_adapter = :solid_queue
