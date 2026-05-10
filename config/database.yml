@@ -46,7 +46,6 @@ development:
 # Do not set this db to the same as development or production.
 test:
   <<: *default
-  <<: *default
   database: 'hr_api_test'
   host: <%= ENV['DB_HOST'] || 'localhost' %>
   port: 5432
@@ -80,18 +79,14 @@ test:
 # for a full overview on how database connection configuration can be specified.
 #
 production:
-  primary: &primary_production
+  primary:
     <<: *default
-    database: <%= ENV['DB_NAME'] || 'hr_api_production' %>
-    host: <%= ENV['DB_HOST'] || 'localhost' %>
-    port: <%= ENV['DB_PORT'] || 5432 %>
-    username: <%= ENV['DB_USER'] || 'postgres' %>
-    password: <%= ENV['DB_PASSWORD'] %>
-  cache:
-    <<: *primary_production
-    database: hr_api_production_cache
-    migrations_paths: db/cache_migrate
-  queue:
-    <<: *primary_production
-    database: hr_api_production_queue
-    migrations_paths: db/queue_migrate
+<% if ENV["DATABASE_URL"].present? %>
+    url: <%= ENV["DATABASE_URL"] %>
+<% else %>
+    database: <%= ENV.fetch("DB_NAME", "hr_api_production") %>
+    host: <%= ENV.fetch("DB_HOST", "localhost") %>
+    port: <%= ENV.fetch("DB_PORT", 5432) %>
+    username: <%= ENV.fetch("DB_USER", "postgres") %>
+    password: <%= ENV["DB_PASSWORD"] %>
+<% end %>

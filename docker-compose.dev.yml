@@ -6,6 +6,9 @@ services:
     ports:
       - "3000:3000"
     env_file: .env.dev
+    environment:
+      # Run Solid Queue supervisor inside Puma (same pattern as production docker-compose).
+      SOLID_QUEUE_IN_PUMA: "1"
     depends_on:
       hrdb:
         condition: service_healthy
