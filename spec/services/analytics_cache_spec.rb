@@ -1,6 +1,7 @@
 require "rails_helper"
 
 RSpec.describe AnalyticsCache do
+  before { Rails.cache.clear }
   describe ".country_salary_key" do
     it "normalizes country to uppercase" do
       expect(described_class.country_salary_key("us")).to eq("country_salary/US")
@@ -57,6 +58,33 @@ RSpec.describe AnalyticsCache do
 
       expect(Rails.cache.read(described_class.job_title_average_key("AU", "Developer"))).to be_nil
       expect(Rails.cache.read(described_class.job_title_average_key("AU", "Architect"))).to be_nil
+    end
+
+    describe ".invalidate_dashboard_statistics" do
+      it "removes the dashboard statistics entry from the cache" do
+        Rails.cache.write(described_class.dashboard_statistics_key, { total_employees: 1 })
+
+        described_class.invalidate_dashboard_statistics
+
+        expect(Rails.cache.read(described_class.dashboard_statistics_key)).to be_nil
+      end
+    end
+
+    it "clears dashboard statistics cache on employee update" do
+      employee = create(:employee, country: "NL", job_title: "Dev", salary: 55_000)
+      Rails.cache.write(described_class.dashboard_statistics_key, { total_employees: 99 })
+
+      employee.update!(salary: 60_000)
+
+      expect(Rails.cache.read(described_class.dashboard_statistics_key)).to be_nil
+    end
+
+    it "clears dashboard statistics cache on employee create" do
+      Rails.cache.write(described_class.dashboard_statistics_key, { total_employees: 0 })
+
+      create(:employee, country: "SE", job_title: "Dev", salary: 70_000)
+
+      expect(Rails.cache.read(described_class.dashboard_statistics_key)).to be_nil
     end
   end
 end
