@@ -2,6 +2,8 @@ require "rails_helper"
 
 RSpec.describe "Dashboard API", type: :request do
   before { Rails.cache.clear }
+  let!(:current_user) { create(:user) }
+  let(:headers) { auth_headers_for(current_user) }
 
   describe "GET /api/v1/dashboards" do
     it "returns aggregate statistics for all employees" do
@@ -9,7 +11,7 @@ RSpec.describe "Dashboard API", type: :request do
       create(:employee, country: "US", department: "Engineering", salary: 100_000.00)
       create(:employee, country: "CA", department: "Sales", salary: 60_000.00)
 
-      get "/api/v1/dashboards"
+      get "/api/v1/dashboards", headers: headers
 
       expect(response).to have_http_status(:ok)
       data = json_body["data"]
@@ -20,7 +22,7 @@ RSpec.describe "Dashboard API", type: :request do
     end
 
     it "returns zeros and nil average when there are no employees" do
-      get "/api/v1/dashboards"
+      get "/api/v1/dashboards", headers: headers
 
       expect(response).to have_http_status(:ok)
       data = json_body["data"]
